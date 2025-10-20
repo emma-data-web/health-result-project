@@ -54,6 +54,10 @@ class UserResponse(BaseModel): # -- response model
     
     model_config = ConfigDict(from_attributes=True)
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
 
 def get_db():
     db = sessionlocal()
@@ -96,3 +100,20 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             status_code=500,
             content={"detail": str(e)}  # Send error message in response
         )
+    
+
+@app.post("/login")
+def user_login(user: UserLogin, db: Session = Depends(get_db)):
+        
+          # 1. Find user by email
+        db_user = db.query(UserDb).filter(UserDb.email == user.email).first()
+        if not db_user:
+            raise HTTPException(status_code=400, detail="Invalid email or password")
+        
+        # 2. Verify password
+        if not pwd_context.verify(user.password, db_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Invalid email or password")
+        
+        # 3. Return success message
+        return {"message": f"Welcome back, {db_user.name}!"}
+    
