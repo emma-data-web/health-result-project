@@ -1,15 +1,14 @@
-from fastapi import FastAPI, status, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, status, HTTPException, Depends
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 
 
 app = FastAPI()
 
 
-database_url = "sqlite://./test.db"
+database_url = "sqlite:///./test.db"
 engine = create_engine(database_url, 
 connect_args={"check_same_thread":False})
 sessionlocal = sessionmaker(autocommit=False, 
@@ -17,17 +16,17 @@ autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-class userdb(Base):
+class UserDb(Base):
     __tablename__ = "users"
 
     id = Column(Integer,primary_key=True, index=True)
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
 
-Base.metadata.create_all(bind=engine)   #---- create table
+#Base.metadata.create_all(bind=engine)   #---- create table
 
 
-class Usercreate(BaseModel): # --request model
+class UserCreate(BaseModel): # --request model
     name: str
     email : str
 
@@ -36,8 +35,7 @@ class UserResponse(BaseModel): # -- response model
     name: str
     email: str
     
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 def get_db():
@@ -47,54 +45,24 @@ def get_db():
     finally:
         db.close()
 
-"""
-class User(BaseModel):   # request model
-    name: str
-    age: int
-    email: str
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+    print("Tables created.")
 
 
-class UserResponse(BaseModel):  # response model
-    id:int
-    name: str
-    email: str
 
-"""
-
-@app.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user: User):
-    fake_id = 1
-    return {
-        "id":fake_id,
-        "name": user.name,
-        "email": user.email
-    }
-
-
-@app.post("/user")
-def create(user: User):
-    return{
-        "message": "user created",
-        "user_data": user
-    }
-
-@app.post("/new")
-def fast(name="emma"):
-    return {
-        "msg": name
-    }
-
-
-@app.get("/test")
-def test():
-    return {"its working fine"}
-
-
-@app.get("/try/{user_id}")
-def new(user_id: int):
-    return{"the result": {user_id}}
-
-
-@app.get("/search")
-def away(name: str, age: int):
-    return {"the name": name, "the age": age}
+@app.post("/users/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # Check if email already exists
+    existing_user = db.query(UserDb).filter(UserDb.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    new_user = UserDb(name=user.name, email=user.email)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)  # Refresh instance to get the new id
+    
+    return new_user
