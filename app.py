@@ -20,12 +20,34 @@ Base = declarative_base()
 class userdb(Base):
     __tablename__ = "users"
 
+    id = Column(Integer,primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+
+Base.metadata.create_all(bind=engine)   #---- create table
 
 
+class Usercreate(BaseModel): # --request model
+    name: str
+    email : str
+
+class UserResponse(BaseModel): # -- response model
+    id: int
+    name: str
+    email: str
+    
+    class Config:
+        orm_mode = True
 
 
+def get_db():
+    db = sessionlocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-
+"""
 class User(BaseModel):   # request model
     name: str
     age: int
@@ -37,6 +59,7 @@ class UserResponse(BaseModel):  # response model
     name: str
     email: str
 
+"""
 
 @app.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: User):
