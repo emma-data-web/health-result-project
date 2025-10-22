@@ -105,10 +105,10 @@ def get_db():
 
 @app.on_event("startup")
 def on_startup():
-    print("🔁 Dropping and recreating tables...")
+    print(" Dropping and recreating tables...")
    #Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    print("✅ Tables created successfully")
+    print(" Tables created successfully")
 
 
 
