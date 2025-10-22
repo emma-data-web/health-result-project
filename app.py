@@ -14,10 +14,12 @@ import numpy as np
 
 app = FastAPI()
 
-print("Using DB file:", os.path.abspath("./test.db"))
-database_url = "sqlite:///./test.db"
-engine = create_engine(database_url, 
-connect_args={"check_same_thread":False})
+#print("Using DB file:", os.path.abspath("./test.db"))
+
+database_url = os.getenv("database_url")
+
+engine = create_engine(database_url)
+
 sessionlocal = sessionmaker(autocommit=False, 
 autoflush=False, bind=engine)
 Base = declarative_base()
@@ -105,7 +107,7 @@ def on_startup():
 
 
 
-@app.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED, include_in_schema=True)
+@app.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED, include_in_schema=True)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     try:
         # Check if user already exists
