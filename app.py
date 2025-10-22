@@ -10,6 +10,9 @@ from fastapi.responses import JSONResponse
 import joblib
 import pandas as pd
 import numpy as np
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 app = FastAPI()
@@ -36,16 +39,16 @@ def get_password_hash(password):
         print("Error in get_password_hash:", e)
         raise
 
+    
 class UserDb(Base):
     __tablename__ = "users"
 
-    id = Column(Integer,primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    position = Column(String, nullable=True)  
-    Department = Column(String, nullable=True)
-
+    position = Column(String, nullable=True)
+    department = Column(String, nullable=True)
 #Base.metadata.create_all(bind=engine)   #---- create table
 
 
@@ -54,7 +57,7 @@ class UserCreate(BaseModel): # --request model
     email : str
     password: str
     position: str
-    Department: str
+    department: str
 
 class UserResponse(BaseModel): # -- response model
     id: int
@@ -102,8 +105,10 @@ def get_db():
 
 @app.on_event("startup")
 def on_startup():
+    print("🔁 Dropping and recreating tables...")
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    print("Tables created.")
+    print("✅ Tables created successfully")
 
 
 
@@ -118,13 +123,13 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         hashed_password = get_password_hash(user.password)
 
         new_user = UserDb(
-            name=user.name,
-            email=user.email,
-            hashed_password=hashed_password,
-            position = user.position,
-            Department= user.Department
-
-        )
+        name=user.name,
+        email=user.email,
+        hashed_password=hashed_password,
+        position=user.position,
+        department=user.department
+)
+        
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
@@ -164,7 +169,7 @@ def check_profile(user: UserProfileRequest, db: Session = Depends(get_db)):
         "name": db_user.name,
         "email": db_user.email,
         "position": db_user.position,
-        "Department": db_user.Department
+        "Department": db_user.department
     }
 
     return profile
