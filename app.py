@@ -21,7 +21,7 @@ app = FastAPI()
 
 database_url = os.getenv("database_url")
 
-engine = create_engine(database_url)
+engine = create_engine(database_url,pool_pre_ping=True)
 
 sessionlocal = sessionmaker(autocommit=False, 
 autoflush=False, bind=engine)
