@@ -95,6 +95,23 @@ class UserFeaturesRequest(BaseModel):
 class UserTragetResponse(BaseModel):
     death: int
 
+class ModelRequest(BaseModel):
+    Age: int
+    Body_Temperature: float
+    Hemoglobin: float
+    RBC_Count: float
+    Platelet_Count: int
+    Has_Fever: int
+    Has_Chills: int
+    Has_Vomiting: int
+    Rainy_Season: int
+
+class ModelResponse(BaseModel):
+    Result: int
+    confidence: str
+
+model = joblib.load("real_malaria_model.pkl")
+
 def get_db():
     db = sessionlocal()
     try:
@@ -195,3 +212,26 @@ def get_predictions(features: UserFeaturesRequest):
         print("Prediction error:", e)
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
 
+
+@app.post("/malpredict", response_model=ModelResponse, status_code=status.HTTP_200_OK)
+def get_malaria_prediction(user: ModelRequest):
+    try:
+        # Convert request to DataFrame
+        input_data = pd.DataFrame([user.model_dump(by_alias=True)])
+
+        # Make prediction (0 or 1)
+        prediction = model.predict(input_data)
+
+        
+        confidence = round(model.predict_proba(input_data)[:, 1][0] * 100)
+
+        
+
+        return {
+            "Result": int(prediction[0]),
+            "confidence":  f" the confidences level of the result is {confidence}%"
+        }
+
+    except Exception as e:
+        print("Prediction error:", e)
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
