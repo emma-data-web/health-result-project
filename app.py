@@ -257,4 +257,14 @@ def get_malaria_prediction(user: ModelRequest):
 
 
 
-@app.post("/diapredict")
+@app.post("/diapredict", response_model=DiaModelResponse, status_code=status.HTTP_200_OK)
+def get_dia(user: DiaModelRequest):
+    try: 
+        input = pd.DataFrame([user.model_dump(by_alias=True)])
+
+        prediction = dia_model.predict(input)
+
+        return {"Outcome": int(prediction)}
+    except Exception as e:
+        print("Prediction error:", e)
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
