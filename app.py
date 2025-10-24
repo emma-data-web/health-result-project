@@ -110,7 +110,26 @@ class ModelResponse(BaseModel):
     Result: int
     confidence: str
 
+
+
+
+class DiaModelRequest(BaseModel):
+    Pregnancies: int
+    Glucose: int
+    BloodPressure: int
+    SkinThickness: int
+    Insulin: int
+    BMI: float
+    DiabetesPedigreeFunction: float
+    Age: int
+
+
+class DiaModelResponse(BaseModel):
+    Outcome: int
+
 model = joblib.load("real_malaria_model.pkl")
+
+dia_model = joblib.load("diabetes_model.pkl")
 
 def get_db():
     db = sessionlocal()
@@ -235,3 +254,7 @@ def get_malaria_prediction(user: ModelRequest):
     except Exception as e:
         print("Prediction error:", e)
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
+
+
+
+@app.post("/diapredict")
