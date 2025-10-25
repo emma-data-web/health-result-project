@@ -11,14 +11,24 @@ import joblib
 import pandas as pd
 import numpy as np
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
 
 app = FastAPI()
 
-#print("Using DB file:", os.path.abspath("./test.db"))
+origins = [
+    "*",
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],   
+    allow_headers=["*"],
+)
 database_url = os.getenv("database_url")
 
 engine = create_engine(database_url,pool_pre_ping=True)
