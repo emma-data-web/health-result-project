@@ -14,6 +14,6 @@ data["death"] = data["No. of deaths"].apply(lambda x: x.split("[")[0])
 
 data["case"] = data["No. of cases"].apply(lambda x: x.split("[")[0])
 
-#the data death and case columns are messy, you can use a different apporach though
+#the data death and case columns are messy, you can use a different apporach 
 
 joblib.dump(data,"estimated_numbers.csv")
