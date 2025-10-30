@@ -51,5 +51,5 @@ final_pipeline = Pipeline(steps=[
 x_train, x_test, y_train, y_test = train_test_split(df[columns],df[target],test_size=0.3, random_state=101)
 
 final_pipeline.fit(x_train,y_train)
-
+# i ididnt push the model, check well 0
 joblib.dump(final_pipeline,"malaria_death_mmodel.pkl")
