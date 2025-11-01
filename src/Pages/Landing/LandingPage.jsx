@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-dom"
+import { Link } from "react-router-dom"
 import "./LandingPage.css";
 
 export default function LandingPage() {
@@ -9,17 +9,17 @@ export default function LandingPage() {
       <div className="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
 
       {/* Navbar */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-4 shadow-lg">
-        <Link className="text-3xl font-extrabold text-blue-700 tracking-wide">
+      <nav className="relative z-10 flex items-center justify-between px-5 md:px-8 py-4 shadow-lg">
+        <Link to="/" className="text:xl md:text-3xl font-extrabold text-blue-700 tracking-wide">
           Ota Health AI
         </Link>
         <div className="space-x-4">
-          <button className="px-6 py-2 rounded-full border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-600 hover:text-white transition duration-500 cursor-pointer">
+          <Link to="/login" className="px-6 py-2 rounded-full border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-600 hover:text-white transition duration-500 cursor-pointer">
             Login
-          </button>
-          <button className="px-6 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition duration-500 cursor-pointer">
+          </Link>
+          <Link to="/register" className="px-6 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition duration-500 cursor-pointer">
             SignUp
-          </button>
+          </Link>
         </div>
       </nav>
 
