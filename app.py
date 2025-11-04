@@ -137,9 +137,38 @@ class DiaModelRequest(BaseModel):
 class DiaModelResponse(BaseModel):
     Outcome: int
 
+
+class HealthModelRequest(BaseModel):
+    age: int
+    gender: str
+    temperature: float
+    heart_rate: int
+    systolic_bp: int
+    diastolic_bp: int
+    glucose_level: float
+    oxygen_level: float
+    bmi: float
+    cough: str
+    fatigue: str
+    headache: str
+    nausea: str
+    chest_pain: str
+    shortness_of_breath: str
+    vision_problem: str
+    frequent_urination: str
+    joint_pain: str
+
+
+class HealthModelResponse(BaseModel):
+    predicted_disease: str
+
+
 model = joblib.load("real_malaria_model.pkl")
 
 dia_model = joblib.load("diabetes_model.pkl")
+
+health_model = joblib.load("health_disease_pipeline.joblib")
+health_label_encoder = joblib.load("label_encoder.joblib")
 
 def get_db():
     db = sessionlocal()
@@ -278,3 +307,23 @@ def get_dia(user: DiaModelRequest):
     except Exception as e:
         print("Prediction error:", e)
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
+    
+
+
+@app.post("/healthpredict", response_model=HealthModelResponse, status_code=status.HTTP_200_OK)
+def predict_health_condition(data: HealthModelRequest):
+    try:
+        
+        input_df = pd.DataFrame([data.model_dump()])
+
+        
+        pred_encoded = health_model.predict(input_df)
+        pred_label = health_label_encoder.inverse_transform(pred_encoded)[0]
+
+        return {"predicted_disease": pred_label}
+
+    except Exception as e:
+        print("Prediction error:", e)
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
+
+print(" Using database:", database_url)
