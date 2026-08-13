@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.pipeline import Pipeline
-from modules import ColumnLabelEncoder
+from app.model_helpers.modules import ColumnLabelEncoder
 
 df = pd.read_csv("ai_health_dataset.csv")
 
